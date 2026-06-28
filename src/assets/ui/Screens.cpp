@@ -49,15 +49,14 @@ const char kDemoScreen[] = R"json(
             { "type": "label", "text": "IP     : {wifi.ip}", "id": "wifi_ip" }
           ]
         },
-        { "type": "label", "text": "Scan, pick a network below, type the password, then Connect.",
+        { "type": "label", "text": "Tap Scan, then pick a network. The password box appears only for secured networks.",
           "style": "subtitle", "wrap": true, "width": "100%" },
-        { "type": "textarea", "id": "wifi_pass", "placeholder": "Password (tap to type)",
-          "one_line": true, "password": true, "width": "100%", "onClick": "kb.show" },
-        { "type": "panel", "width": "100%", "height": "content", "flex": "row", "gap": 10, "children": [
-          { "type": "button", "text": "Scan", "onClick": "wifi.scan", "grow": 1 },
-          { "type": "button", "text": "Connect", "onClick": "wifi.connect", "grow": 1 }
-        ]},
+        { "type": "button", "text": "Scan networks", "onClick": "wifi.scan", "width": "100%" },
         { "type": "label", "text": "Selected: (none)", "id": "wifi_selected", "wrap": true, "width": "100%" },
+        { "type": "textarea", "id": "wifi_pass", "placeholder": "Password (tap to type)",
+          "one_line": true, "password": true, "width": "100%", "onClick": "kb.show", "hidden": true },
+        { "type": "button", "text": "Connect", "id": "wifi_connect", "onClick": "wifi.connect",
+          "width": "100%", "hidden": true },
         { "type": "list", "id": "wifi_list", "width": "100%", "height": 150 }
       ]},
 
@@ -126,7 +125,7 @@ const char kDemoScreen[] = R"json(
 
     ]},
 
-    { "type": "keyboard", "id": "kb", "width": "100%", "height": "45%",
+    { "type": "keyboard", "id": "kb", "width": "100%", "height": "40%",
       "align": "bottom_mid", "hidden": true, "onReady": "kb.hide", "onCancel": "kb.hide" }
 
   ]

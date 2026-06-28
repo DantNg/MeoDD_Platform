@@ -132,6 +132,18 @@ static void registerActions() {
     auto* wifi = g_platform->wifi();
     lv_obj_t* list = g_ui.byId("wifi_list");
     if (!wifi || !list) return;
+
+    // Reset the selection flow: hide password + Connect until a network is picked.
+    g_selectedSsid = "";
+    if (lv_obj_t* s = g_ui.byId("wifi_selected"))
+      lv_label_set_text(s, "Selected: (none)");
+    if (lv_obj_t* ta = g_ui.byId("wifi_pass")) {
+      lv_textarea_set_text(ta, "");
+      lv_obj_add_flag(ta, LV_OBJ_FLAG_HIDDEN);
+    }
+    if (lv_obj_t* c = g_ui.byId("wifi_connect")) lv_obj_add_flag(c, LV_OBJ_FLAG_HIDDEN);
+    if (lv_obj_t* kb = g_ui.byId("kb")) lv_obj_add_flag(kb, LV_OBJ_FLAG_HIDDEN);
+
     lv_obj_clean(list);
     lv_list_add_text(list, "Scanning...");
     lv_refr_now(NULL);  // paint "Scanning..." before the blocking scan
@@ -149,13 +161,23 @@ static void registerActions() {
       String row = nw.ssid + "   " + nw.rssi + " dBm" + (nw.open ? "  (open)" : "");
       lv_obj_t* btn = lv_list_add_btn(list, LV_SYMBOL_WIFI, row.c_str());
       lv_obj_set_user_data(btn, (void*)(intptr_t)i);  // remember which network
-      // Pick this network as the connection target.
+      // Pick this network: reveal Connect, and the password box only if secured.
       lv_obj_add_event_cb(btn, [](lv_event_t* e) {
         size_t idx = (size_t)(intptr_t)lv_obj_get_user_data(lv_event_get_target(e));
-        if (idx < g_scan.size()) {
-          g_selectedSsid = g_scan[idx].ssid;
-          if (lv_obj_t* l = g_ui.byId("wifi_selected"))
-            lv_label_set_text(l, (String("Selected: ") + g_selectedSsid).c_str());
+        if (idx >= g_scan.size()) return;
+        const net::WifiNetwork& nw = g_scan[idx];
+        g_selectedSsid = nw.ssid;
+        if (lv_obj_t* l = g_ui.byId("wifi_selected"))
+          lv_label_set_text(l, (String("Selected: ") + g_selectedSsid +
+                                (nw.open ? "  (open, no password)" : "")).c_str());
+        if (lv_obj_t* c = g_ui.byId("wifi_connect"))
+          lv_obj_clear_flag(c, LV_OBJ_FLAG_HIDDEN);
+        if (lv_obj_t* ta = g_ui.byId("wifi_pass")) {
+          lv_textarea_set_text(ta, "");
+          if (nw.open)
+            lv_obj_add_flag(ta, LV_OBJ_FLAG_HIDDEN);  // open network: no password
+          else
+            lv_obj_clear_flag(ta, LV_OBJ_FLAG_HIDDEN);  // secured: ask for password
         }
       }, LV_EVENT_CLICKED, nullptr);
     }
