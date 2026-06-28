@@ -1,0 +1,11 @@
+# Default platform partition table - 4MB flash, single firmware (OTA off).
+# To enable OTA: create partitions_ota.csv (two app slots ota_0/ota_1) + -D FEATURE_OTA=1.
+#
+# NOTE: 'app' partitions must be aligned to 0x10000.
+# nvs(0x5000)+otadata(0x2000) fill 0x9000..0x10000 -> factory starts exactly at 0x10000.
+#
+# Name,    Type, SubType,  Offset,    Size,      Flags
+nvs,       data, nvs,      0x9000,    0x5000,
+otadata,   data, ota,      0xe000,    0x2000,
+factory,   app,  factory,  0x10000,   0x370000,
+storage,   data, spiffs,   0x380000,  0x80000,
