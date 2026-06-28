@@ -37,7 +37,8 @@ const char kDemoScreen[] = R"json(
         { "type": "panel", "width": "100%", "height": "content", "flex": "row", "gap": 10, "children": [
           { "type": "led", "color": "#33FF66", "on": true },
           { "type": "label", "text": "System running", "grow": 1 },
-          { "type": "button", "text": "Refresh", "onClick": "ui.refresh" }
+          { "type": "button", "text": "Refresh", "onClick": "ui.refresh" },
+          { "type": "button", "text": "Dashboard", "onClick": "nav.go:dashboard" }
         ]}
       ]},
 
@@ -128,6 +129,62 @@ const char kDemoScreen[] = R"json(
     { "type": "keyboard", "id": "kb", "width": "100%", "height": "40%",
       "align": "bottom_mid", "hidden": true, "onReady": "kb.hide", "onCancel": "kb.hide" }
 
+  ]
+}
+)json";
+
+// ---------------------------------------------------------------------------
+// GPS performance meter dashboard (800x480). The card chrome, dividers, glow and
+// the green/blue icons are baked into the "background" image; here we only overlay
+// the dynamic text at absolute (x, y) positions measured against that image.
+// "{race.*}" bindings supply the values; "{sym.*}" expand to LVGL symbol glyphs.
+// ---------------------------------------------------------------------------
+const char kRaceDashboard[] = R"json(
+{
+  "type": "screen", "bg_img": "background", "pad": 0, "radius": 0,
+  "children": [
+
+    { "type": "label", "text": "{sym.gps}   {sym.wifi}", "style": "val_green", "x": 20, "y": 46 },
+    { "type": "label", "text": "12 SATELLITES", "style": "sect", "text_color": "#35DD5B", "x": 20, "y": 74 },
+
+    { "type": "label", "text": "READY TO START", "style": "ready", "x": 20, "y": 112 },
+    { "type": "label", "text": "Waiting for launch...", "style": "subtitle", "x": 20, "y": 142 },
+
+    { "type": "button", "id": "start_btn", "style": "start_text", "text": "START",
+      "x": 18, "y": 188, "width": 224, "height": 102, "onClick": "race.start" },
+
+    { "type": "label", "id": "speed", "text": "{race.speed}", "style": "num_xl", "live": true, "x": 50, "y": 326 },
+    { "type": "label", "text": "mph", "style": "unit", "x": 96, "y": 362 },
+
+    { "type": "button", "style": "start_text", "text": "{sym.settings}",
+      "x": 20, "y": 446, "width": 44, "height": 30, "onClick": "nav.go:demo" },
+
+    { "type": "label", "text": "RUN #12", "style": "badge", "align": "top_right", "x": -30, "y": 12 },
+
+    { "type": "label", "text": "0 - 60 mph", "style": "sect", "x": 292, "y": 58 },
+    { "type": "label", "text": "3.42 s", "style": "val_green", "align": "top_right", "x": -32, "y": 56 },
+
+    { "type": "label", "text": "60 ft", "style": "sect", "x": 292, "y": 106 },
+    { "type": "label", "text": "1.62 s", "style": "val", "align": "top_right", "x": -32, "y": 104 },
+
+    { "type": "label", "text": "330 ft", "style": "sect", "x": 292, "y": 155 },
+    { "type": "label", "text": "4.48 s", "style": "val", "align": "top_right", "x": -32, "y": 153 },
+
+    { "type": "label", "text": "1/8 mile", "style": "sect", "x": 292, "y": 204 },
+    { "type": "label", "text": "6.88 s   @ 105.2 mph", "style": "val", "align": "top_right", "x": -32, "y": 202 },
+
+    { "type": "label", "text": "1/4 mile", "style": "sect", "x": 292, "y": 253 },
+    { "type": "label", "text": "10.65 s   @ 129.8 mph", "style": "val", "align": "top_right", "x": -32, "y": 251 },
+
+    { "type": "label", "text": "129.8", "style": "num_lg", "x": 292, "y": 338 },
+    { "type": "label", "text": "mph", "style": "unit", "x": 294, "y": 388 },
+
+    { "type": "label", "text": "496", "style": "num_lg", "x": 556, "y": 338 },
+    { "type": "label", "text": "hp", "style": "unit", "x": 558, "y": 388 },
+
+    { "type": "label", "text": "2:35 PM", "style": "subtitle", "x": 292, "y": 452 },
+    { "type": "label", "text": "86 F", "style": "subtitle", "x": 600, "y": 452 },
+    { "type": "label", "text": "{sym.charge} 13.2V", "style": "subtitle", "align": "top_right", "x": -30, "y": 452 }
   ]
 }
 )json";

@@ -10,4 +10,7 @@ namespace assets {
 // Controls / System / About tabs.
 extern const char kDemoScreen[];
 
+// A GPS drag-strip performance meter (0-60, 1/8 & 1/4 mile, top speed, HP).
+extern const char kRaceDashboard[];
+
 }  // namespace assets

@@ -14,6 +14,7 @@
 #include <functional>
 #include <map>
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include "ActionBus.h"
@@ -42,6 +43,32 @@ class UiContext {
     return it == ids_.end() ? nullptr : it->second;
   }
 
+  // Track a label whose text contains "{token}" bindings and should be re-resolved
+  // periodically (schema "live": true). refreshLive() re-applies them on the GUI task.
+  void trackLive(lv_obj_t* obj, const String& tmpl) {
+    live_.push_back(std::make_pair(obj, tmpl));
+  }
+  void refreshLive() {
+    for (auto& e : live_)
+      lv_label_set_text(e.first, bindings_.resolve(e.second).c_str());
+  }
+
+  // Clear per-screen state before building a new page (stale ids / live labels /
+  // event links from the torn-down widget tree).
+  void reset() {
+    ids_.clear();
+    live_.clear();
+    links_.clear();
+  }
+
+  // Register / fetch an LVGL image source by name, so the JSON schema can refer
+  // to a flash-embedded image (lv_img_dsc_t) via "src"/"bg_img": "<name>".
+  void registerImage(const String& name, const void* src) { images_[name] = src; }
+  const void* image(const String& name) {
+    auto it = images_.find(name);
+    return it == images_.end() ? nullptr : it->second;
+  }
+
   // Wired by UiFactory; lets a builder recurse into nested nodes.
   void setNodeBuilder(NodeBuilder b) { nodeBuilder_ = std::move(b); }
   lv_obj_t* buildNode(lv_obj_t* parent, JsonObjectConst node) {
@@ -63,6 +90,8 @@ class UiContext {
   NodeBuilder nodeBuilder_;
   std::vector<std::unique_ptr<ActionLink>> links_;
   std::map<String, lv_obj_t*> ids_;
+  std::map<String, const void*> images_;
+  std::vector<std::pair<lv_obj_t*, String>> live_;
 };
 
 }  // namespace ui

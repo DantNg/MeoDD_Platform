@@ -71,6 +71,10 @@ void UiFactory::applyCommon(lv_obj_t* o, JsonObjectConst node) {
   }
   if (node["text_color"].is<const char*>())
     lv_obj_set_style_text_color(o, parseColor(node["text_color"], lv_color_white()), 0);
+  if (node["bg_img"].is<const char*>()) {
+    if (const void* src = ctx_.image(node["bg_img"].as<const char*>()))
+      lv_obj_set_style_bg_img_src(o, src, 0);
+  }
   if (node["radius"].is<int>())
     lv_obj_set_style_radius(o, node["radius"].as<int>(), 0);
   if (node["pad"].is<int>())
